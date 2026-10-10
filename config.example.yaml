@@ -1,23 +1,36 @@
-# Halo Miner configuration for Studio Quattro Design.
+# Halo Miner configuration for Studio Quattro Design (Solana Beach, CA).
 # Copy to config.yaml, edit, then:  halo-miner mine --config config.yaml --out runs/$(date +%F)
 brand: Studio Quattro Design
-service: interior design
+website: https://studioquattrodesign.com
+service: Italian kitchen and cabinetry design
+location: Solana Beach, CA (San Diego & Orange County)
 
 sources:
   reddit:
     enabled: true
-    # Free, no key required (set REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET for 10x faster OAuth access).
-    subreddits: [InteriorDesign, HomeImprovement, Renovations, homeowners, DesignMyRoom, HomeDecorating, kitchenremodel, Remodel]
+    # REQUIRED since May 2026: a free Reddit "script" app -> export REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET.
+    # Unauthenticated .json requests now return 403. allow_unauthenticated: true only tries the legacy path.
+    allow_unauthenticated: false
+    subreddits: [kitchenremodel, InteriorDesign, HomeImprovement, Renovations, homeowners, Remodel, DesignMyRoom, HomeDecorating, Cabinetry, sandiego, orangecounty]
     queries:
-      - hired an interior designer
-      - interior designer worth it
-      - interior designer cost
-      - renovation regret
-      - contractor nightmare
-      - over budget renovation
-      - overwhelmed renovation decisions
+      - kitchen designer worth it
+      - hired a kitchen designer
+      - kitchen showroom experience
+      - Italian kitchen cabinets
+      - European cabinets vs American
+      - custom cabinets vs IKEA
+      - cabinet quality particle board
+      - cabinet lead time delay
+      - cabinets arrived damaged
+      - kitchen remodel regret
+      - kitchen remodel over budget
+      - contractor nightmare kitchen
+      - custom closet worth it
+      - walk-in closet design
+      - bathroom vanity quality
       - dream kitchen finally
-      - forever home renovation
+      - forever home kitchen
+      - overwhelmed kitchen decisions
     limit_per_query: 50
     pages: 1
     time_filter: all           # hour | day | week | month | year | all
@@ -25,26 +38,27 @@ sources:
 
   yelp:
     enabled: false
-    # Route 1: Yelp Fusion API (YELP_API_KEY) - finds businesses; returns 3 short excerpts per business.
-    term: interior designer
-    locations: ["Los Angeles, CA"]
+    # Route 1: Yelp Fusion API (YELP_API_KEY) - finds businesses; returns only 3 short excerpts per business.
+    term: kitchen design cabinetry
+    locations: ["Solana Beach, CA", "San Diego, CA", "Irvine, CA"]
     businesses_per_location: 10
-    # Route 2: read full reviews from business pages' JSON-LD (see README for the Terms-of-Service caveat).
+    # Route 2: business-page JSON-LD (html: true). Yelp blocks bots aggressively; see README before enabling.
     html: false
     pages: 3
-    # Or list businesses explicitly (your own listing + competitors):
     businesses:
-      - {name: "Studio Quattro Design", url: "https://www.yelp.com/biz/your-listing-alias"}
+      - {name: "Studio Quattro Design", url: "https://www.yelp.com/biz/studio-quattro-design-solana-beach"}
 
   google:
     enabled: false
-    # GOOGLE_PLACES_API_KEY: Places API (New), max 5 reviews per place.
-    queries: ["interior designer Los Angeles"]
+    # GOOGLE_PLACES_API_KEY: Places API (New), max 5 reviews per place - fine for discovery.
+    queries: ["kitchen designer Solana Beach", "Italian kitchen cabinets San Diego", "custom closets Orange County", "cabinetry showroom San Diego"]
     places_per_query: 10
-    # SERPAPI_KEY: all reviews for a place, paginated.
+    # SERPAPI_KEY: all reviews for a place (paid). Find place_id with the Places API or the Maps URL.
     places:
-      - {name: "Studio Quattro Design", place_id: "ChIJ..."}
+      - {name: "Studio Quattro Design", place_id: "PASTE_PLACE_ID"}
     serpapi_pages: 10
+    # For depth without a paid key, run gosom/google-maps-scraper or google-reviews-scraper-pro and
+    # `halo-miner import` their JSON - formats are auto-detected (see README).
 
 # Halo weighting (defaults shown). 3-4 star reviews and long posts are emphasised.
 weights:
@@ -52,12 +66,11 @@ weights:
   length_reference_words: 120
   length_cap: 3.0
 
-# Extend the phrase lexicon: category -> list of [regex, weight]
+# The cabinetry-market lexicon (particle board, lead times, showroom, handle-less, etc.) is built in.
+# Add more here: category -> list of [regex, weight]
 lexicon_extra:
   pains:
     - ["\\bHOA\\b", 1.0]
-  dreams:
-    - ["\\bindoor[- ]outdoor\\b", 2.0]
 
 report:
   top_n: 15

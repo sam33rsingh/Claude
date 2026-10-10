@@ -108,10 +108,12 @@ def copy_angles(a: Dict, brand: str, service: str) -> List[str]:
 
 # --- Markdown ----------------------------------------------------------------
 
-def render_markdown(a: Dict, brand: str = "Studio Quattro Design", service: str = "interior design") -> str:
+def render_markdown(a: Dict, brand: str = "Studio Quattro Design", service: str = "interior design", website: str = "") -> str:
     o, s, c, cp, t = a["overview"], a["stars"], a["categories"], a["complaint_vs_praise"], a["topics"]
     md: List[str] = []
     md.append(f"# {brand} - Halo Strategy Research Brief\n")
+    if website:
+        md.append(f"_{website}_\n")
     md.append(f"_Generated {a['meta']['generated']} - {o['posts']} posts across {', '.join(f'{k} ({v})' for k, v in o['by_source'].items())}._\n")
     if a["meta"].get("is_fixture"):
         md.append("> **Note:** this run used the bundled **synthetic fixture dataset** (illustrative, not real customers). Run `mine` or `import` against live sources for production numbers.\n")
@@ -231,11 +233,11 @@ def render_markdown(a: Dict, brand: str = "Studio Quattro Design", service: str 
 
 # --- Writers -----------------------------------------------------------------
 
-def write_outputs(a: Dict, scored: Sequence[ScoredPost], out_dir: Path, brand: str, service: str) -> Dict[str, Path]:
+def write_outputs(a: Dict, scored: Sequence[ScoredPost], out_dir: Path, brand: str, service: str, website: str = "") -> Dict[str, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     paths = {}
     paths["report_md"] = out_dir / "halo_report.md"
-    paths["report_md"].write_text(render_markdown(a, brand, service), encoding="utf-8")
+    paths["report_md"].write_text(render_markdown(a, brand, service, website), encoding="utf-8")
     paths["analysis_json"] = out_dir / "analysis.json"
     paths["analysis_json"].write_text(json.dumps(a, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
 

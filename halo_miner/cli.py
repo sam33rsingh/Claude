@@ -36,7 +36,8 @@ def cmd_mine(args: argparse.Namespace) -> int:
     posts: List[Post] = []
     srcs = cfg["sources"]
     if srcs.get("reddit", {}).get("enabled", True):
-        posts.extend(RedditSource().fetch(srcs.get("reddit", {})))
+        rcfg = srcs.get("reddit", {})
+        posts.extend(RedditSource(allow_unauthenticated=bool(rcfg.get("allow_unauthenticated", False))).fetch(rcfg))
     if srcs.get("yelp", {}).get("enabled"):
         posts.extend(YelpSource().fetch(srcs.get("yelp", {})))
     if srcs.get("google", {}).get("enabled"):
@@ -78,7 +79,7 @@ def _run_analysis(posts: List[Post], cfg: dict, out: Path, use_llm: bool, is_fix
         print(f"llm: refined {touched}/{len(scored)} posts", file=sys.stderr)
     rep = cfg.get("report", {})
     a = analyze(scored, top_n=int(rep.get("top_n", 15)), swipe_n=int(rep.get("swipe_n", 12)), is_fixture=is_fixture)
-    paths = write_outputs(a, scored, out, cfg.get("brand", "Studio Quattro Design"), cfg.get("service", "interior design"))
+    paths = write_outputs(a, scored, out, cfg.get("brand", "Studio Quattro Design"), cfg.get("service", "interior design"), cfg.get("website", ""))
     for k, p in paths.items():
         print(f"{k:14s} {p}")
     s = a["stars"]

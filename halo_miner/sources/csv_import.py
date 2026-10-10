@@ -7,11 +7,14 @@ from __future__ import annotations
 
 import csv
 import json
+import logging
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
 from ..models import Post
 from .base import dedupe
+
+log = logging.getLogger("halo_miner.import")
 
 ALIASES: Dict[str, List[str]] = {
     "text": ["text", "review", "review_text", "reviewbody", "body", "content", "comment", "snippet", "selftext", "description", "review text"],
@@ -85,6 +88,12 @@ def load_file(path: str | Path, default_source: str = "csv") -> List[Post]:
     # Already-serialised Post dicts round-trip exactly.
     if rows and isinstance(rows[0], dict) and {"source", "text", "kind"} <= set(rows[0].keys()) and suffix in (".json", ".jsonl"):
         return dedupe([Post.from_dict(r) for r in rows])
+    if suffix == ".json":
+        from .adapters import detect_and_convert
+        hit = detect_and_convert(data)
+        if hit:
+            log.info("import: recognised %s output (%d reviews)", hit[0], len(hit[1]))
+            return dedupe(hit[1])
     return rows_to_posts(rows, default_source)
 
 

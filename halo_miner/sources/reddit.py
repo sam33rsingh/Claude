@@ -1,9 +1,13 @@
-"""Reddit via the public JSON endpoints (no API key needed) with optional OAuth.
+"""Reddit via the official Data API with OAuth (free "script" app).
 
-Reddit's unauthenticated JSON is rate-limited to roughly 10 requests/minute
-per IP - the default 6-second delay stays under that.  With REDDIT_CLIENT_ID /
-REDDIT_CLIENT_SECRET (a free "script" app) the miner uses OAuth and the
-oauth.reddit.com host, which allows ~100 requests/minute.
+Since late May 2026 Reddit returns 403 to unauthenticated ``.json`` requests
+from servers, so credentials are required by default: create an app at
+https://www.reddit.com/prefs/apps (type *script*), then set
+``REDDIT_CLIENT_ID`` and ``REDDIT_CLIENT_SECRET``.  The miner uses the
+client-credentials grant against ``oauth.reddit.com`` (~100 requests/min).
+
+Set ``allow_unauthenticated: true`` in the reddit config to try the legacy
+public endpoints anyway (works from some residential IPs, never from cloud).
 """
 from __future__ import annotations
 
@@ -20,11 +24,14 @@ log = logging.getLogger("halo_miner.reddit")
 PUBLIC = "https://www.reddit.com"
 OAUTH = "https://oauth.reddit.com"
 
-DEFAULT_SUBREDDITS = ["InteriorDesign", "HomeImprovement", "Renovations", "homeowners", "DesignMyRoom", "HomeDecorating", "kitchenremodel", "Remodel"]
+DEFAULT_SUBREDDITS = ["kitchenremodel", "InteriorDesign", "HomeImprovement", "Renovations", "homeowners", "Remodel", "DesignMyRoom", "HomeDecorating", "Cabinetry", "sandiego", "orangecounty"]
 DEFAULT_QUERIES = [
-    "hired an interior designer", "interior designer worth it", "interior designer cost",
-    "renovation regret", "contractor nightmare", "design fee", "over budget renovation",
-    "overwhelmed renovation decisions", "dream kitchen finally", "forever home renovation",
+    "kitchen designer worth it", "hired a kitchen designer", "kitchen showroom experience",
+    "Italian kitchen cabinets", "European cabinets vs American", "custom cabinets vs IKEA",
+    "cabinet quality particle board", "cabinet lead time delay", "cabinets arrived damaged",
+    "kitchen remodel regret", "kitchen remodel over budget", "contractor nightmare kitchen",
+    "custom closet worth it", "walk-in closet design", "bathroom vanity quality",
+    "dream kitchen finally", "forever home kitchen", "overwhelmed kitchen decisions",
 ]
 
 
@@ -37,15 +44,24 @@ def _iso(ts: Optional[float]) -> str:
 class RedditSource(BaseSource):
     name = "reddit"
 
-    def __init__(self, http: Optional[HttpClient] = None, client_id: Optional[str] = None, client_secret: Optional[str] = None):
+    def __init__(self, http: Optional[HttpClient] = None, client_id: Optional[str] = None, client_secret: Optional[str] = None, allow_unauthenticated: bool = False):
         super().__init__(http or HttpClient(delay=6.0))
         self.client_id = client_id or os.environ.get("REDDIT_CLIENT_ID")
         self.client_secret = client_secret or os.environ.get("REDDIT_CLIENT_SECRET")
         self.base = PUBLIC
+        self.authenticated = False
+        self.allow_unauthenticated = allow_unauthenticated
         self._auth()
 
     def _auth(self) -> None:
         if not (self.client_id and self.client_secret):
+            if not self.allow_unauthenticated:
+                raise SourceError(
+                    "Reddit now requires OAuth (unauthenticated .json requests return 403 since May 2026). "
+                    "Create a free 'script' app at https://www.reddit.com/prefs/apps and set "
+                    "REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET, or set reddit.allow_unauthenticated: true to try anyway."
+                )
+            log.warning("reddit: no credentials - trying legacy public endpoints (expect 403 from cloud IPs)")
             return
         try:
             resp = self.http.request(
@@ -54,12 +70,16 @@ class RedditSource(BaseSource):
                 auth=(self.client_id, self.client_secret),
             )
             token = resp.json().get("access_token")
-            if token:
-                self.http.session.headers["Authorization"] = f"bearer {token}"
-                self.base = OAUTH
-                self.http.delay = min(self.http.delay, 1.0)
-                log.info("reddit: OAuth enabled")
+            if not token:
+                raise SourceError(f"reddit: token response had no access_token: {resp.text[:200]}")
+            self.http.session.headers["Authorization"] = f"bearer {token}"
+            self.base = OAUTH
+            self.authenticated = True
+            self.http.delay = min(self.http.delay, 1.0)
+            log.info("reddit: OAuth enabled")
         except (SourceError, ValueError) as e:
+            if not self.allow_unauthenticated:
+                raise SourceError(f"reddit: OAuth failed ({e}); check REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET") from e
             log.warning("reddit: OAuth failed (%s); continuing unauthenticated", e)
 
     # --- parsing (pure, unit-tested) ------------------------------------
@@ -116,7 +136,12 @@ class RedditSource(BaseSource):
             params = {"q": query, "restrict_sr": 1, "sort": "relevance", "t": time_filter, "limit": min(limit, 100), "raw_json": 1}
             if after:
                 params["after"] = after
-            data = self.http.get_json(f"{self.base}/r/{subreddit}/search.json", params=params)
+            try:
+                data = self.http.get_json(f"{self.base}/r/{subreddit}/search.json", params=params)
+            except SourceError as e:
+                if "403" in str(e) and not self.authenticated:
+                    raise SourceError("403 from Reddit: unauthenticated access is blocked; set REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET") from e
+                raise
             posts.extend(self.parse_listing(data, query))
             after = data.get("data", {}).get("after")
             if not after:

@@ -10,7 +10,7 @@ from ..models import Post
 
 log = logging.getLogger("halo_miner")
 
-USER_AGENT = "halo-miner/0.1 (voice-of-customer research; contact: studioquattrodesign.com)"
+USER_AGENT = "halo-miner/0.1 (voice-of-customer research for https://studioquattrodesign.com)"
 
 
 class SourceError(RuntimeError):
