@@ -1,6 +1,7 @@
 # Halo Miner configuration for Studio Quattro Design.
 # Copy to config.yaml, edit, then:  halo-miner mine --config config.yaml --out runs/$(date +%F)
 brand: Studio Quattro Design
+website: https://studioquattrodesign.com
 service: interior design
 
 sources:

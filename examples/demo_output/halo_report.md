@@ -1,6 +1,8 @@
 # Studio Quattro Design - Halo Strategy Research Brief
 
-_Generated 2026-10-10T06:45:43+00:00 - 50 posts across google (14), yelp (11), reddit (25)._
+_https://studioquattrodesign.com_
+
+_Generated 2026-10-10T20:28:05+00:00 - 50 posts across google (14), yelp (11), reddit (25)._
 
 > **Note:** this run used the bundled **synthetic fixture dataset** (illustrative, not real customers). Run `mine` or `import` against live sources for production numbers.
 
@@ -286,11 +288,11 @@ Most-used phrases: **communication** (3), **professional** (3), **honest** (3), 
 
 ## 8. Keyword & phrase frequency (from quotable sentences)
 
-- **pains:** house looks (2) · furniture (5), budget (4), something (4), home (4), house (4), didn't (3), decisions (3), feel (3)
+- **pains:** house looks (2) · furniture (5), budget (4), home (4), something (4), house (4), didn't (3), decisions (3), feel (3)
 - **fears:** money (4), idea (3), house (3), every (3), expensive (3), upfront (3), feel (3), i'm (3)
-- **hopes:** finally feels (2), home finally (2) · finally (6), house (4), storage (4), feels (3), cohesive (3), wish (3), home (3), we'd (3)
-- **dreams:** house feels (3), finally feels (2), genuinely beautiful (2), home finally (2), feels ours (2), forever home (2) · feels (7), home (7), house (7), finally (5), feel (4), beautiful (3), kitchen (3), room (2)
-- **testimonials:** budget (3), kitchen (3), home (3), communication (2), whether (2), feel (2), space (2), listened (2)
+- **hopes:** finally feels (2), home finally (2) · finally (6), storage (4), house (4), feels (3), cohesive (3), wish (3), home (3), we'd (3)
+- **dreams:** house feels (3), finally feels (2), genuinely beautiful (2), home finally (2), feels ours (2), forever home (2) · feels (7), home (7), house (7), finally (5), feel (4), beautiful (3), kitchen (3), living (2)
+- **testimonials:** budget (3), kitchen (3), home (3), communication (2), whether (2), space (2), feel (2), listened (2)
 
 ## 9. Copy angles for the copywriter
 

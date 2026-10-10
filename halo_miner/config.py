@@ -6,6 +6,7 @@ from typing import Any, Dict
 
 DEFAULT_CONFIG: Dict[str, Any] = {
     "brand": "Studio Quattro Design",
+    "website": "https://studioquattrodesign.com",
     "service": "interior design",
     "sources": {
         "reddit": {"enabled": True},
