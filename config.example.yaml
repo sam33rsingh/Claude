@@ -1,0 +1,64 @@
+# Halo Miner configuration for Studio Quattro Design.
+# Copy to config.yaml, edit, then:  halo-miner mine --config config.yaml --out runs/$(date +%F)
+brand: Studio Quattro Design
+service: interior design
+
+sources:
+  reddit:
+    enabled: true
+    # Free, no key required (set REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET for 10x faster OAuth access).
+    subreddits: [InteriorDesign, HomeImprovement, Renovations, homeowners, DesignMyRoom, HomeDecorating, kitchenremodel, Remodel]
+    queries:
+      - hired an interior designer
+      - interior designer worth it
+      - interior designer cost
+      - renovation regret
+      - contractor nightmare
+      - over budget renovation
+      - overwhelmed renovation decisions
+      - dream kitchen finally
+      - forever home renovation
+    limit_per_query: 50
+    pages: 1
+    time_filter: all           # hour | day | week | month | year | all
+    comments_for_top_posts: 15 # pull comment threads for the 15 most-discussed posts (long comments = gold)
+
+  yelp:
+    enabled: false
+    # Route 1: Yelp Fusion API (YELP_API_KEY) - finds businesses; returns 3 short excerpts per business.
+    term: interior designer
+    locations: ["Los Angeles, CA"]
+    businesses_per_location: 10
+    # Route 2: read full reviews from business pages' JSON-LD (see README for the Terms-of-Service caveat).
+    html: false
+    pages: 3
+    # Or list businesses explicitly (your own listing + competitors):
+    businesses:
+      - {name: "Studio Quattro Design", url: "https://www.yelp.com/biz/your-listing-alias"}
+
+  google:
+    enabled: false
+    # GOOGLE_PLACES_API_KEY: Places API (New), max 5 reviews per place.
+    queries: ["interior designer Los Angeles"]
+    places_per_query: 10
+    # SERPAPI_KEY: all reviews for a place, paginated.
+    places:
+      - {name: "Studio Quattro Design", place_id: "ChIJ..."}
+    serpapi_pages: 10
+
+# Halo weighting (defaults shown). 3-4 star reviews and long posts are emphasised.
+weights:
+  star_weights: {"3": 1.5, "4": 1.5, "2": 1.1, "1": 0.9, "5": 0.8, "unrated": 1.0}
+  length_reference_words: 120
+  length_cap: 3.0
+
+# Extend the phrase lexicon: category -> list of [regex, weight]
+lexicon_extra:
+  pains:
+    - ["\\bHOA\\b", 1.0]
+  dreams:
+    - ["\\bindoor[- ]outdoor\\b", 2.0]
+
+report:
+  top_n: 15
+  swipe_n: 12
