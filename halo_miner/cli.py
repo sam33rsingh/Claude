@@ -36,7 +36,8 @@ def cmd_mine(args: argparse.Namespace) -> int:
     posts: List[Post] = []
     srcs = cfg["sources"]
     if srcs.get("reddit", {}).get("enabled", True):
-        posts.extend(RedditSource().fetch(srcs.get("reddit", {})))
+        rcfg = srcs.get("reddit", {})
+        posts.extend(RedditSource(allow_unauthenticated=bool(rcfg.get("allow_unauthenticated", False))).fetch(rcfg))
     if srcs.get("yelp", {}).get("enabled"):
         posts.extend(YelpSource().fetch(srcs.get("yelp", {})))
     if srcs.get("google", {}).get("enabled"):
